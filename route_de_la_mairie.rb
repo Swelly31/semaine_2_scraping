@@ -3,12 +3,17 @@ require 'nokogiri'
 require 'open-uri'
 
 # Actions successives :
-	# Identifier la structure des pages dept - communes
-	# Attraper les villes
-	# Passer les noms des villes en minuscules
-	# Remplacer les espaces par des -
-	# 
+	# identifier la structure des pages dept - communes
+	# attraper les villes
+	# passer les noms des villes en minuscules
+	# remplacer les espaces par des -
+	# génération des url
+	# scrapping des emails
+	# assemblage final
 
+
+#---------------------------------------------------------------------------
+# Scrapper les villes
 
 doc = Nokogiri::HTML(open("http://annuaire-des-mairies.com/val-d-oise.html"))   
 villes = doc.css('a.lientxt').map do |keys|
@@ -16,7 +21,10 @@ villes = doc.css('a.lientxt').map do |keys|
 end
 
 #puts villes
-# J'ai mes villes
+
+
+#---------------------------------------------------------------------------
+# passer en minuscules les villes
 
 def villes_downcase(array)
 	array.map do |n|
@@ -27,27 +35,36 @@ end
 villes_downcased = villes_downcase(villes)
 
 #puts villes_downcased
-# Je les passe en minuscules
+
+
+#---------------------------------------------------------------------------
+
+# remplacer les espaces par des -
 
 def villes_sans_espaces(array)
 	array.each do |n|
 		n.gsub!(/ /,'-')
 	end
 end
-# Methode qui remplace tous les espaces par des - dans un array
 
 villes_sites = villes_sans_espaces(villes_downcased)
 
 #puts villes_sites
 
-# Application de la méthode sur mon array des villes
+
+#---------------------------------------------------------------------------
+
+# génération des adresses url à partir des villes "propres"
 
 
 site_web = villes_sites.map { |e| "http://annuaire-des-mairies.com/95/#{e}.html" } 
-
 #puts site_web
 
-# Créé un array avec chaque site web de chaque ville
+
+
+#---------------------------------------------------------------------------
+
+# scrapper les adresses emails
 
 def emails_scrap(array)
 	array.map do |mails|
@@ -56,15 +73,19 @@ def emails_scrap(array)
 	end
 end
 
-# Loop sur chaque site de mon array dans nokogiri pour aller chercher les mails de ces villes
 
 emails = emails_scrap(site_web)
 
 #puts emails
 
+
+#---------------------------------------------------------------------------
+
+# assemblage du hash final avec villes et adresses emails
+
 final_hash = Hash[villes.zip(emails)]
 
-puts final_hash[0]
+puts final_hash
 
 
 

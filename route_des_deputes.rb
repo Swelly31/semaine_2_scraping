@@ -4,10 +4,19 @@ require 'open-uri'
 
 # Workflow
 # identifier le site à scrapper = https://www.nosdeputes.fr/deputes
-# scrapper les noms et prénoms des députés dans une liste de noms
+# scrapper les noms et prénoms des députés dans une liste brute de noms
 # passer noms et prénoms en minuscules
-# retirer les 6 caractères avant noms et prénoms
+# enlever les espaces devant et derrière les noms et prénoms
+# enlever les caractères spéciaux et les remplacer
+# spliter les prénoms et noms "propres" dans 2 arrays séparés
+# générer les urls des sites dans lesquels on va aller chercher les emails
+# nettoyer les email des caractères / et \
+# rajouter une capitale au nom et au prénom
+# assembler l'array final
 
+
+
+#---------------------------------------------------------
 
 # on scrappe la liste brute des députés
 
@@ -18,6 +27,7 @@ doc = Nokogiri::HTML(open("https://www.nosdeputes.fr/deputes"))
 
 #puts rough_deputes
 
+#---------------------------------------------------------
 # on met cette liste en minuscule
 
 def downcase_deputes(array)
@@ -29,6 +39,8 @@ end
 downcased_deputes = downcase_deputes(rough_deputes)
 
 #puts downcased_deputes
+
+#---------------------------------------------------------
 
 # on enlève les espaces dans cette string de députés
 
@@ -43,6 +55,7 @@ liste_propre_avec_carac_spéciaux = liste_sans_espaces(downcased_deputes)
 
 #puts liste_propre_avec_carac_spéciaux
 
+#---------------------------------------------------------
 
 # on enlève les caractèqes spéciaux
 def caracteres(array)
@@ -87,12 +100,14 @@ liste_noms = noms(liste_propre_sans_éèçi)
 #puts liste_noms
 # ---------------------------------------------------------
 
-# génération des urls
+# génération des urls à partir des présnoms et noms "propres"
 
 urls = liste_noms.zip(liste_prenoms).map { |noms, prenoms| "https://www.nosdeputes.fr/#{prenoms}-#{noms}"}
 
 #puts urls
 
+
+#---------------------------------------------------------
 # scrapping des adresse emails
 
 =begin
@@ -112,6 +127,10 @@ emails = puts emails_scrap(urls)
 
 emails = File.readlines("emails.txt")
 
+
+#---------------------------------------------------------
+
+# On nettoie les emails qui, pour certains contiennent des / et \
 def emails_remove_n(array)
     array.map do |n|
         n.delete("/\n/")
@@ -119,6 +138,11 @@ def emails_remove_n(array)
 end
 
 emails_final = emails_remove_n(emails)
+
+
+#---------------------------------------------------------
+
+# pour l'esthétique on rajoute une capitale au Prénom et au nom
 
 def capitalize(array)
     array.map do |n|
@@ -128,6 +152,11 @@ end
 
 noms_capital = capitalize(liste_noms)
 prenoms_capital = capitalize(liste_prenoms)
+
+
+#---------------------------------------------------------
+
+# pour l'array final on associe Prénoms, Noms et Emails
 
 array_final = []
 x = 0
